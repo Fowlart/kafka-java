@@ -4,6 +4,7 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.serialization.ByteArrayDeserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,9 +22,9 @@ public class ConsumerDemo {
         // define properties
         Properties properties = new Properties();
         properties.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        properties.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+        properties.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class.getName());
         properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-        properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, "java_app");
+        properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, "my_app");
 
         /** After the consumer receives its assignment from the coordinator, it must determine the initial position for
          * each assigned partition. When the group is first created before any messages have been consumed,
@@ -56,19 +57,15 @@ public class ConsumerDemo {
         properties.setProperty(ConsumerConfig.ISOLATION_LEVEL_CONFIG, "read_committed");
 
         //create consumer
-        KafkaConsumer<String, String> consumer = new KafkaConsumer<>(properties);
+        KafkaConsumer<Byte[], String> consumer = new KafkaConsumer<>(properties);
 
         //subscribe consumer
         consumer.subscribe(Collections.singleton("first_topic"));
 
         //poll for data
         while (true) {
-            ConsumerRecords<String, String> consumerRecords = consumer.poll(Duration.ofMillis(100));
-            for (ConsumerRecord<String, String> cr : consumerRecords) {
-                if ("exit".equalsIgnoreCase(cr.value())) {
-                    logger.info(">>> exit signal was received");
-                    // System.exit(0);
-                }
+            ConsumerRecords<Byte[], String> consumerRecords = consumer.poll(Duration.ofMillis(100));
+            for (ConsumerRecord<Byte[], String> cr : consumerRecords) {
                 logger.info("key: " + cr.key() + "| value: " + cr.value());
             }
         }

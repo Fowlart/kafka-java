@@ -14,7 +14,7 @@ public class ProducerWithCallBack {
 
     public static void main(String[] args) {
         KafkaProducer<String, String> kafkaProducer = ProducerDemo.getStringStringKafkaProducer();
-        for (int i = 0; i <= 50; i++) {
+        for (int i = 0; i <= 10; i++) {
             ProducerRecord<String, String> record = new ProducerRecord<>("first_topic",
                     "Hello from ProducerWithCallBack [" + i + "]");
             kafkaProducer.send(record, getCallback());
@@ -25,10 +25,12 @@ public class ProducerWithCallBack {
     public static Callback getCallback() {
         return (recordMetadata, e) -> {
             if (Objects.isNull(e)) {
-                logger.info("offset: " + recordMetadata.offset());
-                logger.info("topic: " + recordMetadata.topic());
-                logger.info("partition: " + recordMetadata.partition());
-                logger.info("timestamp: " + recordMetadata.timestamp());
+                // recordMetadata - something that will be returned from Kafka, as ???delivery acknowledgment???
+                logger.info(
+                        " offset: " + recordMetadata.offset() +
+                                " topic: " + recordMetadata.topic() +
+                                " partition: " + recordMetadata.partition() +
+                                " timestamp: " + recordMetadata.timestamp());
             } else {
                 logger.error(e.getMessage());
             }

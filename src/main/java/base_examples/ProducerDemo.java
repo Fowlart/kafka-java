@@ -8,19 +8,24 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import java.util.Properties;
 
 public class ProducerDemo {
+
     public static void main(String[] args) {
         KafkaProducer<String, String> kafkaProducer = getStringStringKafkaProducer();
         //create a producer record
-        ProducerRecord<String, String> record = new ProducerRecord<>("first_topic", "Hello from ProducerDemo");
+        // Date theDate = new Date();
+        // ProducerRecord<String, String> record = new ProducerRecord<>("first_topic", 0,theDate.getTime(),"to_part_0", "Hello from ProducerDemo");
+        //will be sent at the same partition
+        ProducerRecord<String, String> record = new ProducerRecord<>("first_topic", "to_part_0", "Hello from ProducerDemo");
         //send data - async operation, need flush
         kafkaProducer.send(record);
-        // flush and close
+        //flush and close
         kafkaProducer.close();
     }
 
     public static KafkaProducer<String, String> getStringStringKafkaProducer() {
         Properties properties = new Properties();
 
+        // Required properties: BEGIN
         /**You are required to set the bootstrap.servers property so that the producer can find the Kafka cluster.
          * The client will make use of all servers irrespective of which servers are specified here for bootstrapping—this
          * list only impacts the initial hosts used to discover the full set of servers.
@@ -30,13 +35,13 @@ public class ProducerDemo {
         properties.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         properties.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         properties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-
+        // Required properties: END
 
         /** To optimize for high durability, it is recommended to set acks=all (equivalent to acks=-1),
          * which means the leader will wait for the full set of in-sync replicas to acknowledge the message
          * and to consider it committed. This provides the strongest available guarantees that the record will not be lost
          * as long as at least one in-sync replica remains alive. **/
-        properties.setProperty(ProducerConfig.ACKS_CONFIG, "-1");
+        properties.setProperty(ProducerConfig.ACKS_CONFIG, "all");
 
         /**You can use batch.size to control the maximum size in bytes of each message batch. No attempt will be made
          * to batch records larger than this size. Small batch size will make batching less common and may reduce
